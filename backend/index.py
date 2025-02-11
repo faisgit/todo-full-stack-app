@@ -118,6 +118,25 @@ def get_all_todos():
     return jsonify({'message': 'user not found'}), 404
 
 
+@app.route('/todos/<int:todo_id>', methods=['GET'])
+@jwt_required(locations=['cookies'])
+def get_one_todos(todo_id):
+    user_id = get_jwt_identity()
+
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM todos WHERE id = %s AND user_id = %s", (todo_id, user_id))
+        todo = cur.fetchone()
+
+        if not todo:
+            return jsonify({'message': 'Task not found'}),404
+    conn.close()
+
+    if todo:
+        return jsonify({"todo": todo})
+    return jsonify({'message': 'user not found'}), 404
+    
+
 @app.route('/todos/<int:todo_id>', methods=['DELETE'])
 @jwt_required(locations=['cookies'])
 def delete_todo(todo_id):
@@ -163,7 +182,7 @@ def update_todo(todo_id):
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    response = make_response(jsonify({'message': 'Logged out successfully'}), 200)
+    response = make_response(jsonify({'isAuthenticated': False,'message': 'Logged out successfully'}), 200)
     response.set_cookie('access_token', '', expires=0)  # Clear token
     return response
 
