@@ -1,36 +1,53 @@
-import React, { useState } from 'react'
-import useAuthStore from '../store/authStore'
-import { useNavigate } from 'react-router-dom'
-
+import React, { useState } from "react";
+import useAuthStore from "../store/authStore";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import Input from "../components/Input";
+import Button from "../components/Button";
 function Login() {
-    const {loginUser, isAuthenticated} = useAuthStore()
-    const [username, setUsername] = useState(null)
-    const [password, setPassword] = useState(null)
-    const navigate = useNavigate()
+  const { register, handleSubmit } = useForm();
+  const { loginUser } = useAuthStore();
+  const navigate = useNavigate();
+
+  const onSubmit = async (data) => {
+    try {
+      const res = await loginUser(data);
+      if (res.isAuthenticated) {
+        navigate("/");
+      } else {
+        console.error("Login failed");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <div className='h-96 w-screen flex justify-center items-center'>
-        <div className='h-auto w-96 shadow-2xl flex justify-center items-center flex-col border-2'>
-             <form  className='' onSubmit={async (e) => {
-                e.preventDefault()
-                const data = {
-                    username: username,
-                    password: password
-                }
-                try {
-                  loginUser(data)
-                    navigate('/')
-                    
-                } catch (error) {
-                    console.error(error)
-                }
-             }}>
-                <input type="text" placeholder='username' onChange={(e) => setUsername(e.target.value)}/>
-                <input type="text" placeholder='password'onChange={(e) => setPassword(e.target.value)} />
-                <button>Login</button>
-             </form>
-        </div>
+    <div className="h-screen flex justify-center items-center">
+      <div className=" w-80 flex flex-col justify-center items-center gap-3 py-10 rounded-xl shadow-xl">
+        <h1 className="font-bold text-xl">Login To Your Account</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+          <Input
+            type="text"
+            placeholder="Enter Your Username"
+            label="Username"
+            {...register("username", {
+              required: true,
+            })}
+          />
+          <Input
+            type="password"
+            placeholder="Enter Your Password"
+            label="Password"
+            {...register("password", {
+              required: true,
+            })}
+          />
+          <Button type="submit">Login</Button>
+        </form>
+      </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

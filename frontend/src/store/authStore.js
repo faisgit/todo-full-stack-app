@@ -6,22 +6,22 @@ const api = axios.create({
   withCredentials: true,
 });
 const useAuthStore = create((set) => ({
-  user: null,
-  isAuthenticated: false,
+  user: localStorage.getItem('user') || null,
+  isAuthenticated: localStorage.getItem('isAuthenticated') === "true" ,
   loading: false,
-  mesaage: null,
+  message: null,
 
   loginUser: async (loginData) => {
     const response = await api.post("/login", loginData);
     console.log(response);
-    if (response.data.isAuthenticated) {
       set({
         user: response.data.username,
         isAuthenticated: true,
         loading: false,
-        message: response.data.mesaage,
+        message: response.data.message,
       });
-    }
+      localStorage.setItem('isAuthenticated', true)
+      localStorage.setItem('user', response.data.username)
     return {
       username: response.data.username,
       isAuthenticated: response.data.isAuthenticated,
@@ -39,14 +39,20 @@ const useAuthStore = create((set) => ({
         isAuthenticated: false,
       });
     } catch (error) {
-      set({loading: false, error: error.mesaage() })
+      set({loading: false, error: error.message })
     }
   },
   
   logoutUser : async () => {
     try {
-      await api.post('logout')
-      set({isAuthenticated: false, user: null, loading: false})
+      const response  = await api.post('/logout')
+      set({isAuthenticated: false, user: null, loading: false, message: response.data.message})
+      localStorage.setItem('isAuthenticated', false)
+      localStorage.setItem('user', null)
+      return {
+        message : response.data.message,
+        isAuthenticated: response.data.isAuthenticated
+      }
     } catch (error) {
       set({error: error.message, loading: false})
     }

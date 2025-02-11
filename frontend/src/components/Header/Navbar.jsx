@@ -1,6 +1,7 @@
 import React from 'react'
-import useAuthStore from '../store/authStore'
+import useAuthStore from '../../store/authStore'
 import { useNavigate } from 'react-router-dom'
+import LogoutBtn from './LogoutBtn'
 
 function Navbar() {
     const {isAuthenticated} = useAuthStore()
@@ -34,6 +35,11 @@ function Navbar() {
                     <button onClick={() => navigate(items.path)} className='cursor-pointer hover:underline'>{items.name}</button>
                 </li>
             ) : null)}
+            {isAuthenticated && (
+                <li>
+                    <LogoutBtn />
+                </li>
+            )}
         </ul>
     </nav>
   )
