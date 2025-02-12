@@ -1,10 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: "http://localhost:5000",
-  withCredentials: true,
-});
+import { api } from "../api/api";
 const useAuthStore = create((set) => ({
   user: localStorage.getItem('user') || null,
   isAuthenticated: localStorage.getItem('isAuthenticated') === "true" ,
@@ -33,13 +30,22 @@ const useAuthStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await api.post("/register", registerData);
+      console.log(response);
       set({
         loading: false,
         message: response.data.message,
         isAuthenticated: false,
       });
+      return {
+        message: response.data.message,
+        isAuthenticated: false,
+      };
     } catch (error) {
-      set({loading: false, error: error.message })
+      set({ loading: false, error: error.message });
+      return {
+        message: error.message,
+        isAuthenticated: false,
+      };
     }
   },
   
